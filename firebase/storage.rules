@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin(businessId) {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/businesses/$(businessId)/adminUsers/$(request.auth.uid));
+    }
+
+    function isAllowedImage() {
+      return request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|jpg|png|webp)');
+    }
+
+    match /businesses/{businessId}/enquiries/{enquiryId}/reference/{fileName} {
+      // Public customers may upload a reference image for an enquiry path.
+      allow create: if isAllowedImage();
+      allow read: if true;
+      allow update, delete: if isAdmin(businessId);
+    }
+
+    match /businesses/{businessId}/products/{productId}/{fileName} {
+      allow read: if true;
+      allow write: if isAdmin(businessId) && isAllowedImage();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,97 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin(businessId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businesses/$(businessId)/adminUsers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/businesses/$(businessId)/adminUsers/$(request.auth.uid)).data.businessId == businessId;
+    }
+
+    function isVisify() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/visifyOperators/$(request.auth.uid));
+    }
+
+    function shopAccepting(businessId) {
+      let subPath = /databases/$(database)/documents/businesses/$(businessId)/settings/subscription;
+      return exists(subPath)
+        && get(subPath).data.get('paused', false) != true
+        && get(subPath).data.get('activeUntilMs', 0) >= request.time.toMillis();
+    }
+
+    function enquiryCreateValid(businessId) {
+      let data = request.resource.data;
+      return data.businessId == businessId
+        && data.status == 'NEW'
+        && data.keys().hasAll(['enquiryNumber', 'submissionToken', 'customerSnapshot', 'requestType', 'preferredDate', 'fulfillmentType', 'source'])
+        && data.customerSnapshot.keys().hasAll(['name', 'phone'])
+        && data.customerSnapshot.name is string
+        && data.customerSnapshot.phone is string
+        && data.customerSnapshot.name.size() > 0
+        && data.customerSnapshot.phone.size() >= 10
+        && data.internalNotes == null
+        && data.quotationNotes == null
+        && data.orderId == null
+        && (data.quotedPrice == null || data.quotedPrice is number)
+        && (data.advanceRequired == null || data.advanceRequired is number)
+        && (data.balanceAmount == null || data.balanceAmount is number);
+    }
+
+    match /visifyOperators/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /businesses/{businessId} {
+      allow read: if true;
+      allow write: if isAdmin(businessId) || isVisify();
+
+      match /settings/{docId} {
+        allow read: if true;
+        allow write: if isVisify() || (docId != 'subscription' && isAdmin(businessId));
+      }
+
+      match /billingPayments/{paymentId} {
+        allow read, write: if isVisify();
+      }
+
+      match /categories/{categoryId} {
+        allow read: if true;
+        allow write: if isAdmin(businessId);
+      }
+
+      match /products/{productId} {
+        allow read: if resource.data.available == true || isAdmin(businessId);
+        allow create, update, delete: if isAdmin(businessId);
+      }
+
+      match /enquiries/{enquiryId} {
+        allow create: if enquiryCreateValid(businessId) && shopAccepting(businessId);
+        allow read, update, delete: if isAdmin(businessId) || isVisify();
+        allow list: if isAdmin(businessId) || isVisify();
+      }
+
+      match /customers/{customerId} {
+        allow read, write: if isAdmin(businessId) || isVisify();
+      }
+
+      match /orders/{orderId} {
+        allow read, write: if isAdmin(businessId) || isVisify();
+      }
+
+      match /adminUsers/{userId} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow write: if isAdmin(businessId) || isVisify();
+      }
+
+      match /counters/{counterId} {
+        allow read, write: if isAdmin(businessId) || isVisify();
+      }
+    }
+  }
+}

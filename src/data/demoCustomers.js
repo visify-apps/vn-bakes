@@ -1,0 +1,52 @@
+/**
+ * Demo customers derived from demo enquiries (synthetic only).
+ */
+
+export const demoCustomers = [
+  {
+    id: 'phone_919800000001',
+    businessId: 'vn-bakes',
+    name: 'Demo Customer A',
+    phone: '919800000001',
+    email: null,
+    createdAt: '2026-09-10T08:00:00.000Z',
+    updatedAt: '2026-09-10T08:00:00.000Z',
+    lastEnquiryAt: '2026-09-10T08:00:00.000Z',
+    lastOrderAt: null,
+    totalEnquiries: 1,
+    totalOrders: 0,
+    totalSpend: 0,
+    tags: [],
+    notes: '',
+  },
+  {
+    id: 'phone_919800000002',
+    businessId: 'vn-bakes',
+    name: 'Demo Customer B',
+    phone: '919800000002',
+    email: 'demo.b@example.com',
+    createdAt: '2026-09-09T12:00:00.000Z',
+    updatedAt: '2026-09-10T10:00:00.000Z',
+    lastEnquiryAt: '2026-09-09T12:00:00.000Z',
+    lastOrderAt: null,
+    totalEnquiries: 1,
+    totalOrders: 0,
+    totalSpend: 0,
+    tags: ['quote-sent'],
+  },
+  {
+    id: 'phone_919800000003',
+    businessId: 'vn-bakes',
+    name: 'Demo Customer C',
+    phone: '919800000003',
+    email: null,
+    createdAt: '2026-09-08T08:30:00.000Z',
+    updatedAt: '2026-09-09T11:00:00.000Z',
+    lastEnquiryAt: '2026-09-08T08:30:00.000Z',
+    lastOrderAt: '2026-09-09T11:00:00.000Z',
+    totalEnquiries: 1,
+    totalOrders: 1,
+    totalSpend: 960,
+    tags: ['repeat-candidate'],
+  },
+]

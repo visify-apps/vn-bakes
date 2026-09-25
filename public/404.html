@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <script>
+      (function () {
+        var path = location.pathname
+        var base = path.replace(/\/404\.html$/i, '').replace(/\/$/, '')
+        var rest = path
+        if (base && rest.indexOf(base) === 0) rest = rest.slice(base.length)
+        if (!rest || rest === '/404.html') rest = '/'
+        if (rest.charAt(0) !== '/') rest = '/' + rest
+        location.replace((base || '') + '/#' + rest + location.search)
+      })()
+    </script>
+  </head>
+  <body>
+    <p>Redirecting…</p>
+  </body>
+</html>
