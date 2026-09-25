@@ -10,7 +10,7 @@ import { isLikelyIndianMobile } from './validation'
 const PIECE_CATEGORIES = new Set(['brownies'])
 const MAX_QTY = 200
 
-export const CAKE_SIZES = ['0.5 kg', '1 kg', '1.5 kg', '2 kg', '2.5 kg', '3 kg', '4 kg', '5 kg', 'Bento']
+export const CAKE_SIZES = ['0.5 kg', '1 kg', '1.5 kg', '2 kg', 'Bento', 'Heart']
 
 export function isProductOffered(product) {
   return Boolean(product && product.available !== false)
@@ -90,8 +90,11 @@ export function validateStep(stepId, draft, options = {}) {
       return ''
     }
     case 'gift-details': {
-      if (!String(draft.otherRequirements || '').trim() && !String(draft.colourPreference || '').trim()) {
-        return 'Tell us colours, size feel, or anything special.'
+      if (!String(draft.colourPreference || '').trim()) {
+        return 'Add colours or flower preference.'
+      }
+      if (!String(draft.otherRequirements || '').trim()) {
+        return 'Tell us what to make.'
       }
       return ''
     }

@@ -1,21 +1,22 @@
 /**
- * Enquiry options for VN Bakes Instagram intake (cakes, brownies, chocolates, bouquets).
+ * Enquiry options tuned to VN Bakes Instagram (@vn__bakes__) order DMs:
+ * custom cakes · brownies · bouquets · chocolates — Red Hills / Korattur.
  */
 
 export const REQUEST_TYPES = [
   'Custom Cake',
   'Theme Cake',
   'Brownies',
+  'Bouquet',
   'Chocolates',
-  'Flower Bouquet',
-  'Treat Bouquet',
   'Other',
 ]
 
 export const OCCASIONS = [
   'Birthday',
   'Anniversary',
-  'Friendship',
+  'Friendship Day',
+  'Proposal / Surprise',
   'Thank you',
   'Just because',
   'Festival',
@@ -32,6 +33,16 @@ export const FULFILLMENT_TYPES = [
   { value: 'delivery', label: 'Delivery' },
 ]
 
+/** Areas they serve around Red Hills / Korattur (from IG location). */
+export const SERVICE_AREAS = [
+  'Red Hills',
+  'Korattur',
+  'Ambattur',
+  'Padi',
+  'Anna Nagar',
+  'Other',
+]
+
 export const DELIVERY_TIME_SLOTS = [
   'Morning (9–12)',
   'Afternoon (12–4)',
@@ -39,18 +50,7 @@ export const DELIVERY_TIME_SLOTS = [
   'Exact time on WhatsApp',
 ]
 
-export const CLASS_TIME_SLOTS = ['Morning', 'Afternoon', 'Evening', 'Flexible']
-
-export const ENQUIRY_STEPS = [
-  { id: 'need', title: 'Need', short: 'Need' },
-  { id: 'occasion', title: 'Occasion', short: 'Occasion' },
-  { id: 'requirements', title: 'Details', short: 'Details' },
-  { id: 'reference', title: 'Photo', short: 'Photo' },
-  { id: 'date', title: 'When', short: 'When' },
-  { id: 'fulfillment', title: 'Handover', short: 'Handover' },
-  { id: 'contact', title: 'You', short: 'You' },
-  { id: 'review', title: 'Check', short: 'Check' },
-]
+export const PICKUP_POINTS = ['Red Hills', 'Korattur', 'We’ll confirm on WhatsApp']
 
 export const MAX_REFERENCE_IMAGE_BYTES = 5 * 1024 * 1024
 export const ALLOWED_REFERENCE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
@@ -75,6 +75,7 @@ export function createEmptyEnquiryDraft() {
     preferredDate: '',
     preferredTime: '',
     fulfillmentType: 'pickup',
+    pickupPoint: '',
     deliveryAddress: {
       address: '',
       area: '',
@@ -94,19 +95,14 @@ export function createEmptyEnquiryDraft() {
   }
 }
 
-/** Map product category / name hints into requestType */
+/** Map product category / name hints into requestType (IG menu language). */
 export function inferRequestTypeFromProduct(product) {
   if (!product) return 'Custom Cake'
   const cat = String(product.categoryId || '').toLowerCase()
   const name = String(product.name || '').toLowerCase()
   if (cat === 'brownies' || name.includes('brownie')) return 'Brownies'
   if (cat === 'chocolates' || name.includes('chocolate')) return 'Chocolates'
-  if (name.includes('treat bouquet') || (cat === 'bouquets' && name.includes('treat'))) {
-    return 'Treat Bouquet'
-  }
-  if (cat === 'bouquets' || name.includes('bouquet') || name.includes('flower')) {
-    return 'Flower Bouquet'
-  }
+  if (cat === 'bouquets' || name.includes('bouquet') || name.includes('flower')) return 'Bouquet'
   if (cat.includes('theme') || name.includes('theme')) return 'Theme Cake'
   if (product.requiresCustomEnquiry || product.priceType === 'enquiry') return 'Custom Cake'
   return 'Custom Cake'

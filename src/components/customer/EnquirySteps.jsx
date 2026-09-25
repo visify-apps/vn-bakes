@@ -15,7 +15,7 @@ import {
   Type,
 } from 'lucide-react'
 import { OptionGrid } from './OptionGrid'
-import { FULFILLMENT_TYPES, OCCASIONS, REQUEST_TYPES, DELIVERY_TIME_SLOTS, CLASS_TIME_SLOTS } from '../../data/enquiryOptions'
+import { FULFILLMENT_TYPES, OCCASIONS, REQUEST_TYPES, DELIVERY_TIME_SLOTS, SERVICE_AREAS, PICKUP_POINTS } from '../../data/enquiryOptions'
 import { formatDisplayDate, getMinPreferredDateISO } from '../../utils/enquiry'
 import { formatPrice } from '../../utils/pricing'
 import { canAutoPrice, suggestedAdvance } from '../../utils/autoPrice'
@@ -113,13 +113,14 @@ export function EnquiryStepQuantity({ draft, setDraft, product }) {
 
   return (
     <div className="enquiry-step">
+      <p className="enquiry-hint">How many pieces / brownies do you need?</p>
       <div className="qty-stepper">
         <button type="button" onClick={() => bump(-1)} aria-label="Less">
           −
         </button>
         <input
           inputMode="numeric"
-          value={draft.colourPreference}
+          value={draft.servings}
           onChange={(e) => setDraft((d) => applyQty(product, d, e.target.value.replace(/[^\d]/g, '')))}
         />
         <button type="button" onClick={() => bump(1)} aria-label="More">
@@ -129,11 +130,12 @@ export function EnquiryStepQuantity({ draft, setDraft, product }) {
       <p className="enquiry-hint">Minimum {minQty}</p>
       {total != null ? <p className="price-live">{formatPrice(total)}</p> : null}
       {fromHint && fromHint.kind === 'from' ? <p className="enquiry-hint">{fromHint.label} each</p> : null}
-      <Field label="Note">
+      <Field label="Flavour / note">
         <textarea
           rows={2}
           value={draft.otherRequirements}
           onChange={(e) => setDraft((d) => ({ ...d, otherRequirements: e.target.value }))}
+          placeholder="Classic, nutty, gift wrap…"
         />
       </Field>
     </div>
@@ -168,9 +170,10 @@ export function EnquiryStepRequirements({ draft, setDraft }) {
 
   return (
     <div className="enquiry-step">
+      <p className="enquiry-hint">Same details you’d send in an Instagram DM for a cake order.</p>
       <div className="enquiry-field">
         <span>
-          Size <i aria-hidden="true">*</i>
+          Weight / size <i aria-hidden="true">*</i>
         </span>
         <OptionGrid
           name="Size"
@@ -189,14 +192,18 @@ export function EnquiryStepRequirements({ draft, setDraft }) {
             className="enquiry-other"
             value={draft.cakeSize}
             onChange={set('cakeSize')}
-            placeholder="e.g. 3 kg / 8 inch"
+            placeholder="e.g. 1.5 kg / 6 inch"
           />
         ) : null}
       </div>
 
       <div className="enquiry-fields">
         <Field label="Flavour" required>
-          <input value={draft.flavour} onChange={set('flavour')} />
+          <input
+            value={draft.flavour}
+            onChange={set('flavour')}
+            placeholder="Chocolate, red velvet, vanilla…"
+          />
         </Field>
         <div className="enquiry-field">
           <span>
@@ -209,17 +216,25 @@ export function EnquiryStepRequirements({ draft, setDraft }) {
             onChange={(eggPreference) => setDraft((d) => ({ ...d, eggPreference }))}
           />
         </div>
-        <Field label="Theme">
-          <input value={draft.theme} onChange={set('theme')} placeholder="Optional" />
+        <Field label="Theme / vibe">
+          <input
+            value={draft.theme}
+            onChange={set('theme')}
+            placeholder="From a reel/post — e.g. cartoon, floral, minimal"
+          />
         </Field>
-        <Field label="On the cake">
-          <input value={draft.messageOnCake} onChange={set('messageOnCake')} placeholder="Optional" />
+        <Field label="Message on cake">
+          <input
+            value={draft.messageOnCake}
+            onChange={set('messageOnCake')}
+            placeholder="Happy Birthday Riya…"
+          />
         </Field>
-        <Field label="Colour or shape">
+        <Field label="Colours">
           <input
             value={draft.colourPreference || draft.shape}
             onChange={(e) => setDraft((d) => ({ ...d, colourPreference: e.target.value }))}
-            placeholder="Optional"
+            placeholder="Pink, pastel, gold…"
           />
         </Field>
         <Field label="Anything else">
@@ -227,6 +242,7 @@ export function EnquiryStepRequirements({ draft, setDraft }) {
             rows={2}
             value={draft.otherRequirements}
             onChange={set('otherRequirements')}
+            placeholder="Allergies, toppers, extra details…"
           />
         </Field>
       </div>
@@ -234,18 +250,17 @@ export function EnquiryStepRequirements({ draft, setDraft }) {
   )
 }
 
-
-/** Bouquet / chocolate brief — colours & notes, not cake size. */
+/** Bouquet / chocolate brief — matches IG gift orders. */
 export function EnquiryStepGiftDetails({ draft, setDraft }) {
   return (
     <div className="enquiry-step">
-      <p className="enquiry-hint">Gifting brief — colours, vibe, and any must-haves.</p>
+      <p className="enquiry-hint">Bouquet or chocolate gift — colours, size feel, and message.</p>
       <div className="enquiry-fields">
-        <Field label="Colours / vibe">
+        <Field label="Colours / flowers" required>
           <input
             value={draft.colourPreference}
             onChange={(e) => setDraft((d) => ({ ...d, colourPreference: e.target.value }))}
-            placeholder="e.g. soft pink, chocolate brown"
+            placeholder="Roses, soft pink, mixed pastels…"
           />
         </Field>
         <Field label="What should we make?" required>
@@ -253,14 +268,14 @@ export function EnquiryStepGiftDetails({ draft, setDraft }) {
             rows={3}
             value={draft.otherRequirements}
             onChange={(e) => setDraft((d) => ({ ...d, otherRequirements: e.target.value }))}
-            placeholder="Size feel, flowers, chocolate flavours…"
+            placeholder="Flower count feel, treat mix, chocolate flavours…"
           />
         </Field>
-        <Field label="Message / note">
+        <Field label="Card message">
           <input
             value={draft.messageOnCake}
             onChange={(e) => setDraft((d) => ({ ...d, messageOnCake: e.target.value }))}
-            placeholder="Optional card message"
+            placeholder="Optional note for the gift"
           />
         </Field>
       </div>
@@ -271,7 +286,9 @@ export function EnquiryStepGiftDetails({ draft, setDraft }) {
 export function EnquiryStepReference({ draft, setDraft, referenceFile, setReferenceFile, previewUrl }) {
   return (
     <div className="enquiry-step">
-      <p className="enquiry-hint">Optional — helps us quote the design.</p>
+      <p className="enquiry-hint">
+        Screenshot a reel or post you love — or upload a photo. Helps us match the vibe.
+      </p>
       <div className="menu-photos">
         {previewUrl ? (
           <div className="menu-photo">
@@ -297,18 +314,19 @@ export function EnquiryStepReference({ draft, setDraft, referenceFile, setRefere
           rows={2}
           value={draft.referenceNotes}
           onChange={(e) => setDraft((d) => ({ ...d, referenceNotes: e.target.value }))}
+          placeholder="Colours, height, toppers…"
         />
       </Field>
     </div>
   )
 }
 
-/** Cake ready-by date + handover window. */
+/** Needed-by date + time window (IG order “date?”). */
 export function EnquiryStepDate({ draft, setDraft, minimumPreorderDays }) {
   const minDate = getMinPreferredDateISO(minimumPreorderDays)
   return (
     <div className="enquiry-step">
-      <Field label={`Cake needed by · earliest ${formatDisplayDate(minDate)}`} required>
+      <Field label={`Needed by · earliest ${formatDisplayDate(minDate)}`} required>
         <input
           type="date"
           min={minDate}
@@ -337,6 +355,9 @@ export function EnquiryStepFulfillment({ draft, setDraft }) {
       },
     }))
 
+  const areaListed = SERVICE_AREAS.includes(draft.deliveryAddress.area)
+  const areaOther = Boolean(draft.areaOther) || Boolean(draft.deliveryAddress.area && !areaListed)
+
   return (
     <div className="enquiry-step">
       <OptionGrid
@@ -347,30 +368,62 @@ export function EnquiryStepFulfillment({ draft, setDraft }) {
       />
       {draft.fulfillmentType === 'delivery' ? (
         <div className="enquiry-fields">
-          <p className="enquiry-hint">Delivery charges are confirmed on WhatsApp.</p>
-          <Field label="Address" required>
+          <p className="enquiry-hint">We deliver around Red Hills / Korattur — charges confirmed on WhatsApp.</p>
+          <div className="enquiry-field">
+            <span>
+              Area <i aria-hidden="true">*</i>
+            </span>
+            <OptionGrid
+              name="Area"
+              options={SERVICE_AREAS.map((a) => ({ value: a, label: a }))}
+              value={areaListed ? draft.deliveryAddress.area : areaOther ? 'Other' : ''}
+              onChange={(area) =>
+                setDraft((d) => ({
+                  ...d,
+                  areaOther: area === 'Other',
+                  deliveryAddress: {
+                    ...d.deliveryAddress,
+                    area: area === 'Other' ? '' : area,
+                  },
+                }))
+              }
+            />
+            {areaOther ? (
+              <input
+                className="enquiry-other"
+                value={draft.deliveryAddress.area}
+                onChange={setAddress('area')}
+                placeholder="Your area"
+              />
+            ) : null}
+          </div>
+          <Field label="Full address" required>
             <textarea
               rows={2}
               value={draft.deliveryAddress.address}
               onChange={setAddress('address')}
+              placeholder="Street, landmark…"
             />
           </Field>
-          <div className="menu-price-row">
-            <Field label="Area" required>
-              <input value={draft.deliveryAddress.area} onChange={setAddress('area')} />
-            </Field>
-            <Field label="Pin" required>
-              <input
-                inputMode="numeric"
-                value={draft.deliveryAddress.pincode}
-                onChange={setAddress('pincode')}
-                maxLength={6}
-              />
-            </Field>
-          </div>
+          <Field label="Pincode" required>
+            <input
+              inputMode="numeric"
+              value={draft.deliveryAddress.pincode}
+              onChange={setAddress('pincode')}
+              maxLength={6}
+            />
+          </Field>
         </div>
       ) : (
-        <p className="enquiry-hint">We’ll confirm the pickup time on WhatsApp.</p>
+        <div className="enquiry-fields">
+          <p className="enquiry-hint">Pickup in Red Hills or Korattur — we’ll confirm the exact spot.</p>
+          <OptionGrid
+            name="Pickup"
+            options={PICKUP_POINTS.map((p) => ({ value: p, label: p }))}
+            value={draft.pickupPoint || ''}
+            onChange={(pickupPoint) => setDraft((d) => ({ ...d, pickupPoint }))}
+          />
+        </div>
       )}
     </div>
   )

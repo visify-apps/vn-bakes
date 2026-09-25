@@ -58,7 +58,9 @@ export function buildDraftFromProduct(product, existing = createEmptyEnquiryDraf
     existing.servings ||
     (product.minimumQuantity ? String(product.minimumQuantity) : existing.servings)
   const requestType = inferRequestTypeFromProduct(product)
-  const giftLike = ['Brownies', 'Chocolates', 'Flower Bouquet', 'Treat Bouquet'].includes(requestType)
+  const giftLike = ['Brownies', 'Chocolates', 'Bouquet', 'Flower Bouquet', 'Treat Bouquet'].includes(
+    requestType,
+  )
   return {
     ...existing,
     productId: product.id,
